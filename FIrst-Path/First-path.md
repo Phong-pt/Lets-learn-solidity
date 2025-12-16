@@ -48,11 +48,12 @@ nó cũng hỡ trợ **exponential operator** tức là toán tử mũ: 5**2 equ
 ## chapter 5: Structs
 thi thoảng chúng ta cần nhiều kiểu data phức tạp. Solidity cung cấp structs
 ex: 
-    ```solidity
+
+```solidity
     struct Person{
         uint age;
         string name;    // day la mot kieu du liệu string tuong tu ngon ngu khác
     }
-    ```
+```
 >[!NOTE] HIểu đơn giản thì nó giống như oop, đây là các kiểu dữ liệu của class Person
 Struct cho phép chúng ta tạo nhiều biến phức tạp với nhiều thuộc tính khác nhau.
