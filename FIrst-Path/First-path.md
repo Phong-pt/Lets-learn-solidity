@@ -13,8 +13,9 @@ contract HelloWorld{
 
 Tất cả các solidity code đều bắt đầu bằng **pragma solidity**, chúng ta có thể lựa chọn version complie bằng cách :
 - ^version(ex 0.6.0) tức là sử dụng complie version lớn hơn version 0.6.0 đều được, còn bé hơn thì không
-- **<**version tức là sử dụng complie version nhỏ hơn, lớn hơn không được
-- **>**=version **<**version thì có thể sử dụng complie ở khoảng giữa này 
+- `< version` : sử dụng compile version **nhỏ hơn** version chỉ định, lớn hơn không được
+- `>= version < version` : có thể sử dụng compile ở **khoảng giữa hai version**
+
 
 
 ## Chapter 3: State Variable and Integer
