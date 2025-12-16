@@ -57,3 +57,60 @@ ex:
 ```
 >[!NOTE] HIểu đơn giản thì nó giống như oop, đây là các kiểu dữ liệu của class Person
 Struct cho phép chúng ta tạo nhiều biến phức tạp với nhiều thuộc tính khác nhau.
+
+
+## chapter 6: Array
+
+Khi mà chúng ta muốn lưu trữ nhiều biến hoặc gì đó , thì chúng ta có array(mảng), Có 2 loại mảng trong solidity:
+- Dynamic(động): Bạn Hiểu thì nó không bị giằng buộc bởi size, bạn có thể lưu trữ bao nhiêu biến hoặc gì đó vào mảng này cũng đc 
+- Fixed (tĩnh): Còn mảng này thì nó sẽ bị **Fixed** , bị giới hạn việc lưu trữ
+
+ex
+
+```solidity
+uint[2] fixedArray;
+//mảng này chỉ chứa 2 phần tử
+string[5] stringArray:
+//mảng này cũng chỉ được phép chứa 5 phần tử , tuy nhiên đặc biệt ở chỗ là 5 phần tử là string
+uint[] dynamicArray:
+//mảng này thì thêm bao nhiêu phần tử thoải mái
+```
+
+và Bạn cũng có thể tạo array của struct. Sử dụng struct person ở chapter 5, ta có:
+
+```solidity
+Person[] people; \\đây là một mãng động 
+\\cú pháp thì tên struct + kiểu mảng liền kề cách ra và tên mảng(ở đây là people) 
+```
+
+bạn cũng có thể declare (gán cho) một mảng là **public** , Và Solidity sẽ tự động create phương thức **getter** cho nó. The syntax nhìn như sau : 
+```solidity
+Person[] public people;
+```   
+
+các contract khác có thể đọc được dữ liệu từ mảng này, nhưng không thể ghi vào mảng này. Đây là một cách hữu ích để lưu trữ data một cách public trong hợp đồng của bạn
+
+
+## chapter 7: Function declarations
+Một funtion decleration nhìn như sau:
+```solidity
+funtion eatHamburgers(string memory _name, uint _amout) public {
+
+}
+```
+
+Đây là một hàm tên là eatHambergers , được truyền 2 tham số (parameter) là **string** và **uint**. Lưu ý rằng phamj vi hiểm thị của hàm này chúng ta đnag để là public , chúng ta cũng cung cấp instructions (hướng dẫn) nơi mà _name sẽ được lưu trữ - trong **memory**. Điều này cần thiết cho các kiểu dữ liệu như : arrays, structs, mapping, và strings 
+
+vậy thì loại tham chiếu là gì (reference type) ?
+
+có 2 cách mà chúng ta có thể truyền một tham số trong solidity:
+- Truyền theo value: có nghĩa là solidity sẽ tạo ra một bản copy của giá trị tham số và truyền vào hàm. Điều này cho phép hàm của bạn có thể điều chỉnh giá trị mà không cần lo lắng sẽ làm thay đổi giá trị gốc
+
+- truyền tham chiếu(reference): Có nghĩa là hàm của bạn được gọi với một tham chiếu tới biến gốc. Do đó nếu hàm của bạn thay đổi biến mà nó nhận , thì biến gốc cũng sẽ bị thay đổi.
+
+>[!NOTE] Để thuận tiện (ko yêu cầu), tên biến tham số hàm thường bắt đầu bằng  dấu gạch chân dưới (_), để phân biệt chúng với **biến toàn cục(global variables)**.
+
+chúng ta sẽ gọi hàm trên như sau
+```solidity
+eatHamburgers("victor", 100);
+```
