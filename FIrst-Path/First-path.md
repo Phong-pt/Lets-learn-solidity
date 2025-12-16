@@ -12,7 +12,7 @@ contract HelloWorld{
 
 
 Tất cả các solidity code đều bắt đầu bằng **pragma solidity**, chúng ta có thể lựa chọn version complie bằng cách :
-- ^version(ex 0.6.0) tức là sử dụng complie version lớn hơn version 0.6.0 đều được, còn bé hơn thì không
+- `^version`(ex 0.6.0) tức là sử dụng complie version lớn hơn version 0.6.0 đều được, còn bé hơn thì không
 - `< version` : sử dụng compile version **nhỏ hơn** version chỉ định, lớn hơn không được
 - `>= version < version` : có thể sử dụng compile ở **khoảng giữa hai version**
 
