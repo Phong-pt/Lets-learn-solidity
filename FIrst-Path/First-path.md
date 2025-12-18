@@ -114,3 +114,123 @@ chúng ta sẽ gọi hàm trên như sau
 ```solidity
 eatHamburgers("victor", 100);
 ```
+
+
+## chapter 8 : Working with Structs and array
+
+tiếp tục với ví dụ struct person ở chapter 5 và tạo mảng people ở chapter 6. Chúng ta sẽ học cách tạo một person mới và thêm chúng vào mảng people
+
+```solidity
+//create new person
+Person satoshi = Person(172,"satoshi");
+
+// add satoshi into array
+people.push(satoshi);
+```
+
+chúng ta cũng có thể kết hợp 2 dòng code trên thành 1 dòng
+
+```solidity
+people.push(Person(16,"nick");)
+```
+
+array.push() thì sẽ add item vào cuối mảng
+
+
+## chapter 9: Private/Public Functions
+
+- Solidity sẽ luôn mặc định Hàm của bạn là public , dẫn đến ai cũng có thể gọi tới và thực thi code trong hàm đó
+- điều đó dễ gây ra lỗ hổng và bị hacker tấn công
+- vì vậy nên tập set **private** mọi lúc và set public khi bạn muốn cho mọi người thấy
+
+cách để khai báo một hàm private:
+
+```solidity
+uint[] numbers;
+
+function _AddToArray(uint _numbers) private {
+    numbers.push(_number);
+}
+```
+
+Khi set private, điều này có nghĩa là chỉ các hàm trong contract của mình mới có thể gọi và thực thi code của hàm private này. Và bạn chú ý thì ta để private sau tên hàm, tham số truyền như bthg với _ . 1 _ dưới number để phân biệt với biến toàn cục, 1 _ là để phân biệt rằng đây là hàm private
+
+
+## chapter 10: More on functions
+
+trong chapter này ta sẽ tìm hiểu về function **return values** and function modify 
+
+### return value
+
+để trả về giá trị từ một hàm. Thì khai báo giống như này:
+```solidity
+string greeting = "What's up dog";
+
+function sayHello() public returns (string memory) {
+  return greeting;
+}
+```
+
+trong solidity , khai báo hàm gồm kiểu dữ liệu trả về. Như bên trên là string
+
+### funtion modify
+
+hàm ví dụ ở return value thực chất nó không thay đổi gì cả 
+
+vậy nên ta có thể khai báo hàm với từ khóa **view** , có nghĩa chỉ view chứ ko modify gì cả
+
+```solidity
+function sayHello() public view returns (string memory) {}
+```
+
+nó cũng có hàm **pure**, có nghĩa rằng bạn thậm chí còn không access bất cứ dữ liệu nào trong app, ví dụ:
+
+```solidity
+function _multiply(uint a, uint b) private pure returns (uint) {
+  return a * b;
+}
+```
+
+hàm trên còn thậm chí chả làm thay đổi trạng thái (state) của app, nó chỉ trả về  dựa vào chính tham số của hàm , vậy nên trong trường hợp này chúng ta để nó là pure
+
+
+## chapter 11 : Keccak256 and Typecasting
+### keccak256
+trong bài này họ đề cập tới việc muốn hàm generateRandomDna trả về một giá trị (Gần như:semi) ngẫu nhiên. Nên họ sử dụng **keccak256**
+
+- keccak256 là một version của SHA3, 1 hash function cơ bản là ánh xạ 1 input thành 1 số 256-bit hexa ngẫu nhiên . 1 thay đổi nhỏ trong data sẽ dẫn tới mã hash thay đổi rất nhiều
+
+- keccak256 yêu cầu dữ liệu đầu vào là `bytes`, có nghĩa là tất cả giá trị trước khi đưa vào sử dụng thì phải chuyển qua byte và chuyển bằng cách `keccak256(abi.encodePacked("aaaaa"))`
+
+- tạo ra một số ngẫu nhiên là một vấn đề **bảo mật** , tuy nhiên thì cryptoZOmbie chưa cần điều đó lắm. 
+
+### Typecasting
+
+```solidity
+uint8 a = 5;
+uint b = 6;
+// throws an error because a * b returns a uint, not uint8:
+uint8 c = a * b;
+// we have to typecast b as a uint8 to make it work:
+uint8 c = a * uint8(b);
+```
+
+## chapter12
+## chapter13: Events
+events là cách hợp đồng của bạn truyền đạt những gì diễn ra trên blockchain lên giao diện người dùng của bạn. Nó có thể Lắng cho vài event nhất định và hành động khi nó xảy ra. Tức là nó ghi lại log lên blockchain
+
+ví dụ :
+```solidity
+// declare the event
+event IntegersAdded(uint x, uint y, uint result);
+
+function add(uint _x, uint _y) public returns (uint) {
+  uint result = _x + _y;
+  // fire an event to let the app know the function was called:
+  emit IntegersAdded(_x, _y, result);
+  return result;
+}
+```
+
+nhưu code ở trên thì app front-end sẽ listen được event. Và đoạn java ở dưới đây là để nghe event. Tức là ko có nó thì ko biết event nói gì dù nó đã dudocj gọi rồi(event được bắn lên blockchain log)
+
