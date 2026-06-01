@@ -22,8 +22,6 @@ Ví dụ: thay vì gắn cứng địa chỉ hợp đồng CryptoKitties vào DA
 
 # chapter 2 : Ownable contract
 
-Bạn có phát hiện ra lỗ hổng bảo mật trong chương trước không?
-
 `setKittyContractAddress` là hàm `external`, do đó bất kỳ ai cũng có thể gọi nó! Điều đó có nghĩa là bất kỳ ai gọi hàm này đều có thể thay đổi địa chỉ của hợp đồng CryptoKitties, và làm hỏng ứng dụng của chúng ta đối với tất cả người dùng.
 
 Chúng ta muốn có khả năng cập nhật địa chỉ này trong hợp đồng của mình, nhưng chúng ta không muốn tất cả mọi người đều có thể cập nhật nó.
@@ -361,3 +359,132 @@ Xem xét lại hàm cụ thể này, người dùng có thể gọi trực tiế
 
 Khi kiểm tra kỹ hơn, hàm này chỉ cần được gọi bởi `feedOnKitty()`, vì vậy cách dễ nhất để ngăn chặn các kiểu khai thác này là đặt nó thành `internal`.
 
+# chương 8: More on Function Modifiers
+
+Function modifiers có tham số (Arguments)
+Trước đây chúng ta đã xem một ví dụ đơn giản về onlyOwner. Nhưng các function modifier cũng có thể nhận các tham số truyền vào y như một hàm bình thường. Ví dụ:
+
+```solidity
+// Một mapping để lưu trữ tuổi của người dùng:
+mapping (uint => uint) public age;
+
+// Modifier yêu cầu người dùng này phải lớn hơn một độ tuổi nhất định:
+modifier olderThan(uint _age, uint _userId) {
+  require(age[_userId] >= _age);
+  _;
+}
+
+// Phải trên 16 tuổi mới được lái xe ô tô (ít nhất là ở Mỹ).
+// Chúng ta có thể gọi modifier `olderThan` với các tham số truyền vào như sau:
+function driveCar(uint _userId) public olderThan(16, _userId) {
+  // Một số logic của hàm
+}
+```
+
+Bạn có thể thấy ở đây modifier olderThan nhận các tham số giống hệt như một hàm. Và hàm driveCar đã truyền các tham số của nó vào cho modifier đó.
+
+
+# chương 9 : Zombie Modifiers
+
+chương này chỉ cần lưu ý cách một hàm chứ modifier 
+ví dụ function .... external modifier {}
+
+và thêm calldata giống như memory nhưng chỉ dùng được với hàm đc khai báo là external
+
+# chương 10: Saving gas with "view" Functions
+
+Hàm "view" thì sẽ không tốn gas
+Lý do :
+1. hàm view chỉ đọc dữ liệu từ blockchain chứ không thay đổi trạng thái (state) của mạng lười (không ghi, không sửa , không xóa)
+2. Cơ chế hoạt động : Thay vì tạo ra một giao dịch (transaction) rồi phát tán lên toàn mạng lưới để hàng ngàn nút (node) cùng xử lý, Web3.js chỉ cần truy vấn dữ liệu trực tiếp từ node Ethereum cục bộ (hoặc node của bên dịch vụ như Infura) đang kết nối với trình duyệt của bạn. Việc này giống như bạn đọc một cuốn sách có sẵn trên kệ vậy – nhanh chóng và miễn phí.
+
+**Lưu ý** Hàm view chỉ MIỄN PHÍ khi nó được gọi từ bên ngoài (External call). Nếu một hàm view được gọi nội bộ (internally) bởi một hàm khác không phải là hàm view trong cùng một contract, nó vẫn sẽ tính phí gas bình thường. Lý do là vì hàm "cha" kia đã tạo ra một giao dịch trên blockchain, nên toàn bộ các bước tính toán bên trong (bao gồm cả hàm view được gọi ké) đều phải được mọi node trên mạng lưới xác thực.
+
+
+# chương 11: Storage
+
+GHi dữ liệu bằng Storage thì sẽ rất đắt đỏ vì nó được lưu trữ vĩnh viễn trên blockchain. Hàng ngàn nodes sẽ phải tải dữ liệu đó về và lưu trữ trên ổ nhớ của họ mãi mãi
+
+Để tiết kiệm nhất : Hãy tránh ghi storage vào nếu thực sự cần thiết, tuyệt đối bắt bắt buộc
+
+
+Điều này dẫn đến một tư duy lập trình khá "ngược đời" so với các ngôn ngữ truyền thống:
+
+Trong các ngôn ngữ như JavaScript hay Python, việc duyệt vòng lặp qua một mảng dữ liệu lớn rất tốn tài nguyên, nên ta thường lưu sẵn kết quả vào một biến để lần sau tìm kiếm cho nhanh.
+
+Nhưng trong Solidity, việc chạy vòng lặp để khởi tạo lại một mảng mới trong memory mỗi khi gọi hàm lại RẺ HƠN RẤT NHIỀU so với việc lưu mảng đó trong storage. Đặc biệt, nếu vòng lặp đó nằm trong một hàm external view, người dùng của bạn sẽ không tốn một đồng xu nào cả!
+
+Cách khai báo mảng trong Memory
+Từ khóa memory giúp bạn tạo ra một mảng tạm thời ngay bên trong hàm. Mảng này sẽ "tan biến" ngay sau khi hàm kết thúc và không để lại dấu vết gì trên blockchain.
+
+Cú pháp khai báo như sau:
+
+```solidity
+function getArray() external pure returns(uint[] memory) {
+  // Khởi tạo một mảng mới trong memory với độ dài cố định là 3
+  uint[] memory values = new uint[](3);
+
+  // Gán giá trị cho mảng
+  values[0] = 1;
+  values[1] = 2;
+  values[2] = 3;
+
+  return values;
+}
+```
+Lưu ý cực kỳ quan trọng về Mảng trong Memory:
+Mảng memory bắt buộc phải khai báo kèm theo độ dài cố định (như số 3 trong ví dụ trên). Tại thời điểm này trong Solidity, mảng memory không thể thay đổi kích thước (không thể dùng hàm .push() để nhét thêm phần tử như mảng storage được).
+
+# for loop
+Chương này mang đến một trong những bài học đắt giá nhất về tư duy lập trình Smart Contract: Tại sao cấu trúc dữ liệu đơn giản nhất đôi khi lại là phương án tồi tệ nhất về mặt chi phí (Gas)?
+
+Hãy cùng phân tích tại sao việc dùng vòng lặp for để quét toàn bộ mảng dữ liệu lại tối ưu hơn việc dùng mapping trực tiếp trong trường hợp này.
+
+Vấn đề của cách làm ngây thơ (Naive Approach)
+Nếu dùng cách tiếp cận thông thường giống như các ngôn ngữ Web2, bạn sẽ tạo một mapping để lưu danh sách zombie của chủ sở hữu:
+
+```solidity
+mapping (address => uint[]) public ownerToZombies;
+```
+
+Mọi thứ trông có vẻ rất mượt mà cho đến khi game của chúng ta có chức năng Chuyển nhượng Zombie (Transfer) từ người này sang người khác. Để chuyển một Zombie nằm ở giữa mảng của người cũ sang người mới, Solidity sẽ phải:
+
+Xóa Zombie đó khỏi mảng của người cũ.
+
+Dịch chuyển (Shift) tất cả các Zombie đứng sau nó lên một vị trí để lấp đầy khoảng trống.
+
+Giảm độ dài của mảng đi 1.
+
+💸 Cơn ác mộng về Gas: > Việc dịch chuyển này yêu cầu bạn phải ghi đè dữ liệu (Write to Storage) lên từng phần tử bị dịch chuyển. Nếu một người chơi có 50 con zombie và họ bán con đầu tiên, hợp đồng sẽ phải thực hiện 49 phép ghi vào storage. Chi phí giao dịch lúc này sẽ cực kỳ đắt đỏ và biến động liên tục, khiến người dùng không thể biết trước mình sẽ tốn bao nhiêu tiền phí.
+(Lưu ý: Bạn có thể đổi vị trí phần tử cuối cùng lên thay thế để không phải dịch mảng, nhưng điều đó sẽ làm đảo lộn hoàn toàn thứ tự hiển thị quân đội zombie của người chơi).
+
+Giải pháp: Chuyển độ phức tạp từ hàm "Ghi" sang hàm "Đọc"
+Vì hàm external view hoàn toàn miễn phí khi gọi từ bên ngoài, chúng ta sẽ bỏ luôn cái mapping (address => uint[]) tốn kém kia đi. Thay vào đó:
+
+Khi Chuyển nhượng (Transfer): Chúng ta chỉ cần thay đổi địa chỉ của chủ sở hữu trong một biến duy nhất (ví dụ: zombieToOwner[zombieId] = newOwner). Thao tác này cực rẻ vì chỉ tốn 1 lần ghi storage.
+
+Khi Hiển thị danh sách (getZombiesByOwner): Chúng ta sẽ dùng vòng lặp for chạy xuyên suốt toàn bộ mảng zombies tổng của trò chơi, nhặt ra những con zombie nào thuộc về _owner và nhét vào một mảng tạm thời trong memory.
+
+Cú pháp vòng lặp for trong Solidity
+Cú pháp for trong Solidity gần như tương đồng hoàn toàn với JavaScript hoặc C++. Dưới đây là ví dụ tìm các số chẵn từ 1 đến 10 để bạn hình dung:
+
+```solidity
+function getEvens() pure external returns(uint[] memory) {
+  // Khởi tạo mảng trong memory với độ dài cố định là 5
+  uint[] memory values = new uint[](5);
+  
+  // Biến đếm index cho mảng 'values'
+  uint counter = 0;
+
+  // Vòng lặp for từ 1 đến 10
+  for (uint i = 1; i <= 10; i++) {
+    // Nếu i là số chẵn
+    if (i % 2 == 0) {
+      values[counter] = i; // Gán vào mảng memory
+      counter++;           // Tăng index của mảng lên 1
+    }
+  }
+  return values;
+}
+```
+Tư duy này có vẻ hơi "ngược đời" so với lập trình truyền thống (chấp nhận chạy vòng lặp duyệt qua một danh sách lớn thay vì truy vấn index trực tiếp), nhưng trên Blockchain, nó giúp người chơi của bạn tiết kiệm được rất nhiều tiền thật!
